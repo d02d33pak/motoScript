@@ -1,6 +1,6 @@
 import os
 import urllib.error
-from urllib.request import urlopen, urlretrieve
+from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
 
@@ -29,15 +29,14 @@ def download_images(image_soup):
             '''can be done with below comment
             also but using urlopen coz its better'''
             #urlretrieve(dl_link, title)
-            conn = urlopen(dl_link)
-            if not os.path.exists(title) and os.path.getsize(title) == len(conn.read):
-                output = open(title)
+            if (not os.path.exists(title)) :
+                conn = urlopen(dl_link)
+                output = open(title, 'wb')
                 output.write(conn.read())
                 output.close()
                 success+=1
         except Exception as err:
             print(err)
-            print('**_err_:' + title)
         finally:
             counter+=1
 
@@ -46,11 +45,11 @@ def download_images(image_soup):
 
 def download_category(soup, path, category):
 
-    div_id = 'mgp-carousel-'+category
+    #div_id = category
     event_names = []
     event_links = []
 
-    body = soup.find('div',id=div_id)
+    body = soup.find('div', class_='list_wrapper row')
 
     for event in body.find_all('li'):
         event_year = event.get('data-sid')
@@ -61,12 +60,13 @@ def download_category(soup, path, category):
     os.chdir(path)
     makeDir('moto')
     makeDir(category)
-    makeDir(event_year)
 
     for i,event in enumerate(event_links):
-        makeDir(event_names[i])
+        makeDir(event_names[i][:4])
+        makeDir(event_names[i][5:])
         content = urlopen(event)
         image_soup = BeautifulSoup(content, 'lxml')
         download_images(image_soup)
+        os.chdir('..')
         os.chdir('..')
 
