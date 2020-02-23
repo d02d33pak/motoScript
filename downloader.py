@@ -4,48 +4,8 @@ from urllib.request import urlopen
 from bs4 import BeautifulSoup
 
 
-def makeDir(folder_name):
-    if not os.path.exists(folder_name):
-        try:
-            os.makedirs(folder_name)
-        except Exception as err:
-            print(err)
-            print('error creating '+folder_name)
-    os.chdir(folder_name)
-
-
-def download_images(image_soup):
-    section = image_soup.find('section', id='links')
-    photos = section.find_all('li')
-    counter = success = 0
-    for pic in photos: 
-        title = pic.div.a.get('title', '') 
-        #to create unique title since
-        #many images have same name on website 
-        title = str(counter).zfill(2) + ' ' + title
-        title += '.jpg'
-        dl_link = pic.div.a.get('data-image-fullscreen', '')
-        try:
-            '''can be done with below comment
-            also but using urlopen coz its better'''
-            #urlretrieve(dl_link, title)
-            if (not os.path.exists(title)) :
-                conn = urlopen(dl_link)
-                output = open(title, 'wb')
-                output.write(conn.read())
-                output.close()
-                success+=1
-        except Exception as err:
-            print(err)
-        finally:
-            counter+=1
-
-    print(success,'/',len(photos),'downloaded')
-
-
 def download_category(soup, path, category):
 
-    #div_id = category
     event_names = []
     event_links = []
 
@@ -62,11 +22,46 @@ def download_category(soup, path, category):
     makeDir(category)
 
     for i,event in enumerate(event_links):
-        makeDir(event_names[i][:4])
-        makeDir(event_names[i][5:])
+        makeDir(event_names[i][:4]) # year-wise folder
+        makeDir(event_names[i][5:]  # event per year)
         content = urlopen(event)
         image_soup = BeautifulSoup(content, 'lxml')
         download_images(image_soup)
         os.chdir('..')
         os.chdir('..')
+
+
+def makeDir(folder_name):
+    if not os.path.exists(folder_name):
+        try:
+            os.makedirs(folder_name)
+        except Exception as err:
+            print(err)
+    os.chdir(folder_name)
+
+
+def download_images(image_soup):
+    section = image_soup.find('section', id='links')
+    photos = section.find_all('li')
+    total = success = 0
+    for pic in photos: 
+        title = pic.div.a.get('title', '') 
+        # formatting titile to '0NN Image Name' 
+        title = str(total).zfill(2) + ' ' + title + '.jpg'
+        dl_link = pic.div.a.get('data-image-fullscreen', '')
+        try:
+            # saving each image file
+            if (not os.path.exists(title)) :
+                conn = urlopen(dl_link)
+                output = open(title, 'wb')
+                output.write(conn.read())
+                output.close()
+                success+=1
+        except Exception as err:
+            print(err)
+        finally:
+            total+=1
+
+    print(success,'/',len(photos),'downloaded')
+
 
