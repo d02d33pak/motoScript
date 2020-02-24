@@ -1,6 +1,5 @@
 import os
-import urllib.error
-from urllib.request import urlopen
+import requests
 from bs4 import BeautifulSoup
 
 
@@ -23,8 +22,9 @@ def download_category(soup, path, category):
 
     for i,event in enumerate(event_links):
         makeDir(event_names[i][:4]) # year-wise folder
-        makeDir(event_names[i][5:]  # event per year)
-        content = urlopen(event)
+        makeDir(event_names[i][5:]) # event per year)
+        print(f'{event_names[i][:4]} -> {event_names[i][5:]}')
+        content = requests.get(event).text
         image_soup = BeautifulSoup(content, 'lxml')
         download_images(image_soup)
         os.chdir('..')
@@ -40,28 +40,26 @@ def makeDir(folder_name):
     os.chdir(folder_name)
 
 
-def download_images(image_soup):
-    section = image_soup.find('section', id='links')
+def download_images(event_soup):
+    section = event_soup.find('section', id='links')
     photos = section.find_all('li')
-    total = success = 0
+    counter = success = 0
     for pic in photos: 
         title = pic.div.a.get('title', '') 
         # formatting titile to '0NN Image Name' 
-        title = str(total).zfill(2) + ' ' + title + '.jpg'
+        title = str(counter).zfill(2) + ' ' + title + '.jpg'
         dl_link = pic.div.a.get('data-image-fullscreen', '')
         try:
             # saving each image file
             if (not os.path.exists(title)) :
-                conn = urlopen(dl_link)
-                output = open(title, 'wb')
-                output.write(conn.read())
-                output.close()
-                success+=1
+                with open(title, 'wb') as output:
+                    output.write(requests.get(dl_link).content)
+                    success+=1
         except Exception as err:
             print(err)
         finally:
-            total+=1
+            counter+=1
 
-    print(success,'/',len(photos),'downloaded')
+    print(f'{success}/{len(photos)} downloaded')
 
 
