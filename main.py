@@ -29,6 +29,6 @@ if __name__ == '__main__':
     to download all the images to
     '''
     path = '/home/d02/Downloads'
-    start_download('gp', path)
+    start_download('teams', path)
 
 
