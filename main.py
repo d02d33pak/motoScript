@@ -3,6 +3,7 @@ I recommend you visit the motogp website
 and inspect element to understand the script better
 '''
 
+import sys
 import requests
 from bs4 import BeautifulSoup
 from downloader import download_category 
@@ -29,6 +30,6 @@ if __name__ == '__main__':
     to download all the images to
     '''
     path = '/home/d02/Downloads'
-    start_download('teams', path)
-
+    category = str(sys.argv[1]) if len(sys.argv) > 1 else 'teams'
+    start_download(category, path)
 

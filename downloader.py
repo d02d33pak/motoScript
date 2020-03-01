@@ -5,7 +5,6 @@ from bs4 import BeautifulSoup
 
 
 def download_category(soup, path, category):
-
     event_names = []
     event_links = []
 
@@ -48,8 +47,8 @@ async def download_images(event_soup):
     counter = skips = success = 0
     for pic in photos: 
         title = pic.div.a.get('title', '') 
-        # many photos on motogp have the same file name so
-        # formatting to 00N format 
+        # many photos on motogp site have the 
+        # same file name so formatting to 00N format 
         title = str(counter).zfill(2) + ' ' + title + '.jpg'
         dl_link = pic.div.a.get('data-image-fullscreen', '')
         try:
@@ -77,3 +76,4 @@ async def download_images(event_soup):
             counter+=1
 
     print(f'\tTOTAL:{len(photos):03} Dowloaded:{success:03} Skipped:{skips:03}\n')
+
