@@ -81,3 +81,4 @@ async def download_images(event_soup):
             counter+=1
 
     print(f'\tTOTAL:{len(photos):03} Dowloaded:{success:03} Skipped:{skips:03}')
+
