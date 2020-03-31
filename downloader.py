@@ -1,7 +1,4 @@
 import os
-import asyncio
-import aiohttp
-import aiofiles
 import requests
 from timeit import default_timer
 from bs4 import BeautifulSoup
@@ -31,7 +28,8 @@ def download_category(soup, path, category):
         print(f'[{i+1}/{len(event_links)}] {event_names[i][:4]} → {event_names[i][5:]}')
         content = requests.get(event).text
         image_soup = BeautifulSoup(content, 'lxml')
-        asyncio.run(download_images(image_soup))
+        # asyncio.run(download_images(image_soup))
+        download_images(image_soup)
         os.chdir('..')      # come out of event dir
         os.chdir('..')      # come out of year dir
         elapsed_time = default_timer() - start_time 
@@ -47,7 +45,7 @@ def makeDir(folder_name):
     os.chdir(folder_name)
 
 
-async def download_images(event_soup):
+def download_images(event_soup):
     section = event_soup.find('section', id='links')
     photos = section.find_all('li')
     counter = skips = success = 0
@@ -56,22 +54,20 @@ async def download_images(event_soup):
         title = str(counter+1).zfill(2) + ' ' + title + '.jpg'
         dl_link = pic.div.a.get('data-image-fullscreen', '')
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.get(dl_link) as image_file:
+            with requests.Session() as session:
+                with session.get(dl_link) as image_file:
                     if (not os.path.exists(title)) :
-                        jpg_image = await aiofiles.open(title, 'wb')
-                        await jpg_image.write(await image_file.read())
+                        with open(title, 'wb') as output:
+                            output.write(image_file.content)
                         success+=1
-                        await jpg_image.close()
                         print(f'\tTOTAL:{len(photos):03} Dowloaded:{success:03} Skipped:{skips:03}\t', end='\r')
-                    elif os.path.getsize(title) != len(await image_file.read()):
-                        jpg_image = await aiofiles.open(title, 'wb')
-                        await jpg_image.write(await image_file.read())
+                    elif os.path.getsize(title) != len(image_file.content):
+                        with open(title, 'wb') as output:
+                            output.write(image_file.content)
                         success+=1
-                        await jpg_image.close()
                         print(f'\tTOTAL:{len(photos):03} Dowloaded:{success:03} Skipped:{skips:03}\t', end='\r')
                     else:
-                        # * if exact file already exists skip the download
+                        # if exact file already exists skip the download
                         skips+=1
                         print(f'\tTOTAL:{len(photos):03} Dowloaded:{success:03} Skipped:{skips:03}\t', end='\r')
 

@@ -1,6 +1,6 @@
 '''
-I recommend you visit the motogp website 
-and inspect element to understand the script better
+I recommend you visit the motogp website and 
+inspect element to understand the script better
 '''
 
 import sys
@@ -15,6 +15,7 @@ def start_download(category, path):
     try:
         full_url = base_url + pathByCategory[category]
         content = requests.get(full_url).text
+        # parsing
         soup = BeautifulSoup(content, 'lxml')
         download_category(soup, path, category)
     except KeyError:
@@ -24,12 +25,12 @@ def start_download(category, path):
 
 if __name__ == '__main__':
     '''
-    can pass gp, best_of, teams
-    or riders as category.
-    path is where you would like
-    to download all the images to
+    categories gp, best_of, riders, teams
+    can be passed as cmd line args
     '''
+    default_category = 'teams'
     path = '/home/d02/Downloads'
-    category = str(sys.argv[1]) if len(sys.argv) > 1 else 'teams'
+    category = str(sys.argv[1]) if len(sys.argv) > 1 else default_category 
     start_download(category, path)
+
 
