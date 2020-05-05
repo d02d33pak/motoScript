@@ -15,7 +15,7 @@ def start_download(category, path):
     try:
         full_url = base_url + pathByCategory[category]
         content = requests.get(full_url).text
-        # parsing
+        # parsing the content 
         soup = BeautifulSoup(content, 'lxml')
         download_category(soup, path, category)
     except KeyError:
