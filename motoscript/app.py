@@ -23,7 +23,7 @@ def start_download(category, path):
         exit(1)
 
 
-if __name__ == '__main__':
+def run():
     '''
     categories gp, best_of, riders, teams
     can be passed as cmd line args
