@@ -1,36 +1,61 @@
-'''
-I recommend you visit the motogp website and 
+"""
+I recommend you visit the motogp website and
 inspect element to understand the script better
-'''
+"""
 
-import sys
+import argparse
+import asyncio
+
 import requests
 from bs4 import BeautifulSoup
-from downloader import download_category 
+
+from downloader import download_category
 
 
 def start_download(category, path):
-    base_url = 'https://motogp.com/en/photos/'
-    pathByCategory = {'gp':'events', 'best_of':'best+of', 'riders':'riders', 'teams':'teams'}
+    """ Entry Point """
+    base_url = "https://motogp.com/en/photos/"
+    path_by_category = {
+        "gp": "events",
+        "best_of": "best+of",
+        "riders": "riders",
+        "teams": "teams",
+    }
     try:
-        full_url = base_url + pathByCategory[category]
+        full_url = base_url + path_by_category[category]
         content = requests.get(full_url).text
-        # parsing the content 
-        soup = BeautifulSoup(content, 'lxml')
-        download_category(soup, path, category)
+        soup = BeautifulSoup(content, "lxml")
+        asyncio.run(download_category(soup, path, category))
     except KeyError:
-        print('wrong category, exiting...')
+        print("wrong category, exiting...")
         exit(1)
 
 
 def run():
-    '''
+    """
     categories gp, best_of, riders, teams
     can be passed as cmd line args
-    '''
-    default_category = 'teams'
-    path = '/home/d02/Downloads'
-    category = str(sys.argv[1]) if len(sys.argv) > 1 else default_category 
+    """
+    parser = argparse.ArgumentParser(
+        description="Download photos from official MotoGP site"
+    )
+
+    parser.add_argument(
+        "-c",
+        "--category",
+        choices=["teams", "riders", "gp", "best_of"],
+        default="teams",
+        help="Category of photos you want to download",
+    )
+    parser.add_argument(
+        "-p",
+        "--path",
+        default="/home/d02/Downloads",
+        help="Path where you want to download the photos to",
+    )
+
+    args = parser.parse_args()
+    category = args.category
+    path = args.path
+
     start_download(category, path)
-
-
